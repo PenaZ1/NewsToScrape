@@ -12,22 +12,29 @@ app.use(
 );
 
 
+
 app.use(express.static(process.cwd() + "/public"));
 
 var exphbs = require("express-handlebars");
 app.engine("handlebars", exphbs({ defaultlayout: "main" }));
 app.set("view engine", "handlebars");
 
-mongoose.connect("mongodb://localhost/NewstoScrape");
-var db = mongoose.connection;
+//connecting to MongoDB
+//mongoose.connect("mongodb://localhost/scraped_news");
+const MONGODB_URI =
+    process.env.MONGODB_URI || "mongodb://localhost/scraper_news";
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
-db.on("error", console.error.bind(console, "connection error"));
-db.on("open", function () {
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function () {
     console.log("Connected to Mongoose!");
 });
 
-
+var routes = require("./controller/controller.js");
+app.use("/", routes);
+//Create localhost port
 var port = process.env.PORT || 3000;
 app.listen(port, function () {
-    console.log("listening on port" + port);
+    console.log("Listening on PORT " + port);
 });
