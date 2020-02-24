@@ -61,7 +61,14 @@ router.get("/articles", function (req, res) {
             if (err) {
                 console.log(err);
             } else {
-                var artcl = { article: doc };
+                const toId = (article) => {
+                    return {
+                        ...article,
+                        id: article._id.toString(),
+                    }
+                }
+                var artcl = { article: doc.map(toId) };
+                console.log(artcl)
                 res.render("index", artcl);
             }
         });
@@ -95,6 +102,7 @@ router.get("/readArticle/:id", function (req, res) {
         article: [],
         body: []
     };
+
     Article.findOne({ _id: articleId })
         .populate("comment")
         .exec(function (err, doc) {
