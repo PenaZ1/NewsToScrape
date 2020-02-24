@@ -61,14 +61,7 @@ router.get("/articles", function (req, res) {
             if (err) {
                 console.log(err);
             } else {
-                const toId = (article) => {
-                    return {
-                        ...article,
-                        id: article._id.toString(),
-                    }
-                }
-                var artcl = { article: doc.map(toId) };
-                console.log(artcl)
+                var artcl = { article: doc };
                 res.render("index", artcl);
             }
         });
@@ -83,7 +76,6 @@ router.get("/articles-json", function (req, res) {
         }
     });
 });
-
 
 router.get("/clearAll", function (req, res) {
     Article.remove({}, function (err, doc) {
@@ -102,6 +94,7 @@ router.get("/readArticle/:id", function (req, res) {
         article: [],
         body: []
     };
+    console.log(err);
 
     Article.findOne({ _id: articleId })
         .populate("comment")
@@ -113,11 +106,13 @@ router.get("/readArticle/:id", function (req, res) {
                 var link = doc.link;
                 request(link, function (error, response, html) {
                     var $ = cheerio.load(html);
+
                     $(".l-col__main").each(function (i, element) {
                         hbsObj.body = $(this)
                             .children(".c-entry-content")
                             .children("p")
                             .text();
+
                         res.render("article", hbsObj);
                         return false;
                     });
@@ -125,22 +120,25 @@ router.get("/readArticle/:id", function (req, res) {
             }
         });
 });
-
 router.post("/comment/:id", function (req, res) {
     var user = req.body.name;
     var content = req.body.comment;
     var articleId = req.params.id;
+
     var commentObj = {
         name: user,
         body: content
     };
+
     var newComment = new Comment(commentObj);
+
     newComment.save(function (err, doc) {
         if (err) {
             console.log(err);
         } else {
             console.log(doc._id);
             console.log(articleId);
+
             Article.findOneAndUpdate(
                 { _id: req.params.id },
                 { $push: { comment: doc._id } },
