@@ -1,22 +1,28 @@
-var express = require("express");
+//dependencies
+var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var logger = require("morgan");
 
+//initialize Express app
+var express = require("express");
 var app = express();
 
 app.use(logger("dev"));
 app.use(
-    express.urlencoded({
+    bodyParser.urlencoded({
         extended: false
     })
 );
 
-
-
 app.use(express.static(process.cwd() + "/public"));
-
+//Require set up handlebars
 var exphbs = require("express-handlebars");
-app.engine("handlebars", exphbs({ defaultlayout: "main" }));
+app.engine(
+    "handlebars",
+    exphbs({
+        defaultLayout: "main"
+    })
+);
 app.set("view engine", "handlebars");
 
 //connecting to MongoDB
